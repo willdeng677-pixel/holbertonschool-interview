@@ -7,14 +7,15 @@ import re
 
 
 def print_stats(total_size, status_codes):
-    """Print accumulated file size and status code counts."""
+    """Print the total file size and counts by status code."""
     print("File size: {}".format(total_size))
+
     for code in sorted(status_codes):
         print("{}: {}".format(code, status_codes[code]))
 
 
 def main():
-    """Read stdin and print statistics every 10 lines."""
+    """Read stdin line by line and compute statistics."""
     total_size = 0
     status_codes = {}
     valid_status_codes = [200, 301, 400, 401, 403, 404, 405, 500]
@@ -33,6 +34,7 @@ def main():
             if match:
                 status = int(match.group(1))
                 size = int(match.group(2))
+
                 total_size += size
 
                 if status in valid_status_codes:
@@ -45,7 +47,7 @@ def main():
         print_stats(total_size, status_codes)
         sys.exit(0)
 
-    if line_count % 10 != 0:
+    if line_count % 10 != 0 or line_count == 0:
         print_stats(total_size, status_codes)
 
 
