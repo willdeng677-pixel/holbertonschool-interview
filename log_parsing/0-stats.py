@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+"""Read log lines from stdin and compute file size and status code metrics."""
+
 import sys
 import re
 
@@ -7,12 +9,12 @@ import re
 def print_stats(total_size, status_codes):
     """Print accumulated file size and status code counts."""
     print("File size: {}".format(total_size))
-
     for code in sorted(status_codes):
         print("{}: {}".format(code, status_codes[code]))
 
 
 def main():
+    """Read stdin and print statistics every 10 lines."""
     total_size = 0
     status_codes = {}
     valid_status_codes = [200, 301, 400, 401, 403, 404, 405, 500]
@@ -26,13 +28,11 @@ def main():
     try:
         for line in sys.stdin:
             line_count += 1
-            line = line.strip()
+            match = pattern.match(line.strip())
 
-            match = pattern.match(line)
             if match:
                 status = int(match.group(1))
                 size = int(match.group(2))
-
                 total_size += size
 
                 if status in valid_status_codes:
@@ -45,7 +45,8 @@ def main():
         print_stats(total_size, status_codes)
         sys.exit(0)
 
-    print_stats(total_size, status_codes)
+    if line_count % 10 != 0:
+        print_stats(total_size, status_codes)
 
 
 if __name__ == "__main__":
