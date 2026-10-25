@@ -9,7 +9,6 @@ import re
 def print_stats(total_size, status_codes):
     """Print the total file size and counts by status code."""
     print("File size: {}".format(total_size))
-
     for code in sorted(status_codes):
         print("{}: {}".format(code, status_codes[code]))
 
@@ -22,7 +21,7 @@ def main():
     line_count = 0
 
     pattern = re.compile(
-        r'^\S+ - \[.*?\] "GET /projects/260 HTTP/1\.1" '
+        r'^\S+ - \[.*?\] "[A-Z]+ .*? HTTP/1\.[01]" '
         r'(\d{3}) (\d+)$'
     )
 
@@ -34,7 +33,6 @@ def main():
             if match:
                 status = int(match.group(1))
                 size = int(match.group(2))
-
                 total_size += size
 
                 if status in valid_status_codes:
