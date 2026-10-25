@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 """Read log lines from stdin and compute file size and status code metrics."""
 
 import sys
@@ -7,7 +6,7 @@ import re
 
 
 def print_stats(total_size, status_codes):
-    """Print the total file size and counts by status code."""
+    """Print accumulated file size and status code counts."""
     print("File size: {}".format(total_size))
     for code in sorted(status_codes):
         print("{}: {}".format(code, status_codes[code]))
@@ -17,12 +16,12 @@ def main():
     """Read stdin line by line and compute statistics."""
     total_size = 0
     status_codes = {}
-    valid_status_codes = [200, 301, 400, 401, 403, 404, 405, 500]
+    valid_status_codes = {200, 301, 400, 401, 403, 404, 405, 500}
     line_count = 0
 
     pattern = re.compile(
-        r'^\S+ - \[.*?\] "[A-Z]+ .*? HTTP/1\.[01]" '
-        r'(\d{3}) (\d+)$'
+        r'^\S+ - \[.*?\] "GET /projects/260 HTTP/1\.1" '
+        r'(\S+) (\d+)$'
     )
 
     try:
@@ -31,12 +30,18 @@ def main():
             match = pattern.match(line.strip())
 
             if match:
-                status = int(match.group(1))
+                status_text = match.group(1)
                 size = int(match.group(2))
                 total_size += size
 
-                if status in valid_status_codes:
-                    status_codes[status] = status_codes.get(status, 0) + 1
+                try:
+                    status = int(status_text)
+                    if status in valid_status_codes:
+                        status_codes[status] = (
+                            status_codes.get(status, 0) + 1
+                        )
+                except ValueError:
+                    pass
 
             if line_count % 10 == 0:
                 print_stats(total_size, status_codes)
