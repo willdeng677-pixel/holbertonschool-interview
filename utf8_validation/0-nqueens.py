@@ -1,71 +1,43 @@
 #!/usr/bin/python3
-"""Solve the N Queens problem."""
-
-import sys
+"""Determine if a dataset represents a valid UTF-8 encoding."""
 
 
-def solve_nqueens(n):
-    """Find and print all possible solutions."""
+def validUTF8(data):
+    """Return True if data is valid UTF-8, otherwise False."""
 
-    solutions = []
-    positions = []
+    remaining_bytes = 0
 
-    columns = set()
-    diagonals1 = set()
-    diagonals2 = set()
+    for num in data:
+        # Only consider the 8 least significant bits
+        byte = num & 0xFF
 
-    def backtrack(row):
-        """Try placing a queen in each column of the current row."""
-
-        if row == n:
-            solutions.append(positions.copy())
-            return
-
-        for col in range(n):
-            # Check if the position is safe
-            if (col in columns or
-                    row - col in diagonals1 or
-                    row + col in diagonals2):
+        if remaining_bytes == 0:
+            # 1-byte character: 0xxxxxxx
+            if (byte >> 7) == 0:
                 continue
 
-            # Place the queen
-            positions.append([row, col])
-            columns.add(col)
-            diagonals1.add(row - col)
-            diagonals2.add(row + col)
+            # 2-byte character: 110xxxxx
+            elif (byte >> 5) == 0b110:
+                remaining_bytes = 1
 
-            # Move to the next row
-            backtrack(row + 1)
+            # 3-byte character: 1110xxxx
+            elif (byte >> 4) == 0b1110:
+                remaining_bytes = 2
 
-            # Backtrack: remove the queen
-            positions.pop()
-            columns.remove(col)
-            diagonals1.remove(row - col)
-            diagonals2.remove(row + col)
+            # 4-byte character: 11110xxx
+            elif (byte >> 3) == 0b11110:
+                remaining_bytes = 3
 
-    backtrack(0)
+            # Invalid leading byte
+            else:
+                return False
 
-    for solution in solutions:
-        print(solution)
+        else:
+            # Continuation byte must start with 10
+            if (byte >> 6) != 0b10:
+                return False
 
+            remaining_bytes -= 1
 
-if __name__ == "__main__":
-
-    # Check the number of arguments
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        sys.exit(1)
-
-    # Check whether N is an integer
-    try:
-        n = int(sys.argv[1])
-    except ValueError:
-        print("N must be a number")
-        sys.exit(1)
-
-    # Check whether N is at least 4
-    if n < 4:
-        print("N must be at least 4")
-        sys.exit(1)
-
-    solve_nqueens(n)
+    # All characters must have their required bytes
+    return remaining_bytes == 0
