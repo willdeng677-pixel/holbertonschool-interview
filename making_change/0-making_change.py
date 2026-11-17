@@ -1,19 +1,37 @@
 #!/usr/bin/python3
+"""
+Module for solving the coin change problem.
+"""
+from collections import deque
+
 
 def makeChange(coins, total):
-    # Handle edge cases where total is 0 or negative
+    """
+    Determine the fewest number of coins needed to meet a given amount total.
+
+    Args:
+        coins (list of int): The values of the coins in possession.
+        total (int): The target amount to meet.
+
+    Returns:
+        int: Fewest number of coins needed to meet total, or -1 if impossible.
+    """
     if total <= 0:
         return 0
 
-    # Create a DP array initialized to a value larger than any possible coin count
-    dp = [total + 1] * (total + 1)
-    dp[0] = 0
+    queue = deque([(0, 0)])
+    visited = {0}
+    coins = sorted(set(coins), reverse=True)
 
-    # Build up the minimum coins required for every amount from 1 to total
-    for amount in range(1, total + 1):
+    while queue:
+        curr_amount, num_coins = queue.popleft()
+
         for coin in coins:
-            if amount - coin >= 0:
-                dp[amount] = min(dp[amount], 1 + dp[amount - coin])
+            next_amount = curr_amount + coin
+            if next_amount == total:
+                return num_coins + 1
+            if next_amount < total and next_amount not in visited:
+                visited.add(next_amount)
+                queue.append((next_amount, num_coins + 1))
 
-    # If dp[total] was never updated, the total cannot be met
-    return dp[total] if dp[total] != total + 1 else -1
+    return -1
