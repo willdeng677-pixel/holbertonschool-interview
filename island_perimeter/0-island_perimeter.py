@@ -14,7 +14,7 @@ def island_perimeter(grid):
     Returns:
         int: The total perimeter of the island.
     """
-    if not grid or not grid[0]:
+    if not grid:
         return 0
 
     rows = len(grid)
