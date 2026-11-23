@@ -1,9 +1,9 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
 const request = require('request');
 
 const movieId = process.argv[2];
-const filmUrl = `https://alx-tools.com{movieId}/`;
+const filmUrl = `https://swapi.dev{movieId}/`;
 
 function printCharacters(urls, index) {
   if (index >= urls.length) {
